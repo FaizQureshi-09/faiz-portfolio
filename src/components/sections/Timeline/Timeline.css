@@ -1,0 +1,193 @@
+.timeline {
+  position: relative;
+  padding-block: var(--space-lg);
+}
+
+.timeline__spine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  transform: translateX(-50%);
+  background-color: var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+.timeline__spine-fill {
+  width: 100%;
+  height: 100%;
+  transform-origin: top;
+  background: var(--color-accent-gradient);
+  border-radius: var(--radius-pill);
+}
+
+.timeline__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+.timeline-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.timeline-item--left {
+  justify-content: flex-start;
+}
+
+.timeline-item--right {
+  justify-content: flex-end;
+}
+
+.timeline-item__node {
+  position: absolute;
+  left: 50%;
+  top: var(--space-md);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-bg-primary);
+  border: 2px solid var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  font-size: var(--font-size-base);
+  z-index: 2;
+  box-shadow: 0 0 0 6px var(--color-bg-secondary);
+}
+
+.timeline-item--experience .timeline-item__node {
+  border-color: var(--color-accent-tertiary);
+  color: var(--color-accent-tertiary);
+}
+
+.timeline-item--education .timeline-item__node {
+  border-color: var(--color-accent-secondary);
+  color: var(--color-accent-secondary);
+}
+
+.timeline-item__card {
+  width: calc(50% - 3.5rem);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  transition: transform var(--transition-base), border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.timeline-item__card:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.timeline-item__type-label {
+  display: inline-block;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent-primary);
+  margin-bottom: var(--space-2xs);
+}
+
+.timeline-item--experience .timeline-item__type-label {
+  color: var(--color-accent-tertiary);
+}
+
+.timeline-item--education .timeline-item__type-label {
+  color: var(--color-accent-secondary);
+}
+
+.timeline-item__duration {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.timeline-item__title {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2xs);
+}
+
+.timeline-item__organization {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  margin-bottom: var(--space-sm);
+}
+
+.timeline-item__description {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.timeline-item__bullets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.timeline-item__bullets li {
+  position: relative;
+  padding-left: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.timeline-item__bullets li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent-primary);
+}
+
+.timeline-item__tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.timeline-item__tech-stack li {
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-pill);
+  background-color: rgba(100, 255, 218, 0.08);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-accent-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 768px) {
+  .timeline__spine {
+    left: 22px;
+  }
+
+  .timeline-item,
+  .timeline-item--left,
+  .timeline-item--right {
+    justify-content: flex-start;
+    padding-left: 3.25rem;
+  }
+
+  .timeline-item__node {
+    left: 22px;
+  }
+
+  .timeline-item__card {
+    width: 100%;
+  }
+}

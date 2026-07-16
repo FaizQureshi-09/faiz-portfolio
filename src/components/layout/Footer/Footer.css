@@ -1,0 +1,24 @@
+.footer {
+  padding-block: var(--space-2xl);
+  border-top: 1px solid var(--color-border-subtle);
+  background-color: var(--color-bg-secondary);
+}
+
+.footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  text-align: center;
+}
+
+.footer__brand {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.footer__copyright {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
