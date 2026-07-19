@@ -48,3 +48,13 @@ coverage/
 .npm/
 .yarn/
 .pnpm-store/
+
+# Terraform
+*.terraform/
+*.tfplan
+crash.log
+*.terraform.lock.hcl
+*.terraform.tfstate.lock*
+
+# Environment
+.env
