@@ -86,3 +86,43 @@
   --z-modal: 200;
   --z-toast: 300;
 }
+
+/**
+ * Light theme overrides, applied via the `data-theme="light"` attribute
+ * on <html> (toggled by useTheme). Only tokens that need to change between
+ * themes are redeclared here — decorative ones like the accent gradient
+ * and inverse text stay constant so buttons/brand marks read consistently
+ * in both modes.
+ */
+:root[data-theme='light'] {
+  /* Surface colors */
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #eef2f7;
+  --color-bg-elevated: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-overlay: rgba(248, 250, 252, 0.85);
+
+  /* Accent palette (deepened so they hold contrast as text/icons on light surfaces) */
+  --color-accent-primary: #0d9488;
+  --color-accent-secondary: #6d28d9;
+  --color-accent-tertiary: #0369a1;
+
+  /* Text colors */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+
+  /* Borders & dividers */
+  --color-border-subtle: rgba(15, 23, 42, 0.08);
+  --color-border-strong: rgba(13, 148, 136, 0.35);
+
+  /* Status */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+
+  /* Elevation (softer, since shadows read heavier against a light backdrop) */
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.14);
+  --shadow-glow: 0 0 40px rgba(13, 148, 136, 0.18);
+}

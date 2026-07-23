@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaMoon, FaSun, FaTimes } from 'react-icons/fa';
 import { navigationLinks } from '../../../data/navigationData';
 import { useActiveSection } from '../../../hooks/useActiveSection';
 import { useScrollPosition } from '../../../hooks/useScrollPosition';
+import { useTheme } from '../../../hooks/useTheme';
 import './Navbar.css';
 
 /**
@@ -14,6 +15,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isScrolled = useScrollPosition(40);
   const activeSectionId = useActiveSection(navigationLinks.map((link) => link.id));
+  const { theme, toggleTheme } = useTheme();
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -46,15 +48,26 @@ export function Navbar() {
           </ul>
         </nav>
 
-        <button
-          type="button"
-          className="navbar__toggle"
-          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          aria-expanded={isMobileMenuOpen}
-          onClick={() => setIsMobileMenuOpen((previous) => !previous)}
-        >
-          {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
+        <div className="navbar__actions">
+          <button
+            type="button"
+            className="navbar__theme-toggle"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? <FaSun /> : <FaMoon />}
+          </button>
+
+          <button
+            type="button"
+            className="navbar__toggle"
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMobileMenuOpen}
+            onClick={() => setIsMobileMenuOpen((previous) => !previous)}
+          >
+            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
       </div>
     </header>
   );

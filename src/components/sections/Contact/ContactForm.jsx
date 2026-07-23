@@ -10,8 +10,15 @@ import { ContactFormField } from './ContactFormField';
  * `useContactForm`'s `submitContactForm` for where to wire up a backend.
  */
 export function ContactForm() {
-  const { values, errors, submissionStatus, submitError, handleFieldChange, handleSubmit } =
-    useContactForm();
+  const {
+    values,
+    errors,
+    submissionStatus,
+    submitError,
+    handleFieldChange,
+    handleFieldBlur,
+    handleSubmit,
+  } = useContactForm();
 
   if (submissionStatus === 'success') {
     return (
@@ -37,6 +44,7 @@ export function ContactForm() {
           label="Name"
           value={values.name}
           onChange={handleFieldChange}
+          onBlur={handleFieldBlur}
           error={errors.name}
           required
         />
@@ -47,6 +55,7 @@ export function ContactForm() {
           label="Email"
           value={values.email}
           onChange={handleFieldChange}
+          onBlur={handleFieldBlur}
           error={errors.email}
           required
         />
@@ -69,6 +78,7 @@ export function ContactForm() {
         label="Message"
         value={values.message}
         onChange={handleFieldChange}
+        onBlur={handleFieldBlur}
         error={errors.message}
         required
       />

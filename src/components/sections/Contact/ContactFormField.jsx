@@ -11,6 +11,7 @@
  * @param {'input'|'textarea'} [props.as='input'] - element to render
  * @param {string} props.value - controlled field value
  * @param {(event: React.ChangeEvent) => void} props.onChange - change handler
+ * @param {(event: React.FocusEvent) => void} [props.onBlur] - blur handler, used for inline validation
  * @param {string} [props.error] - validation error message, if any
  * @param {boolean} [props.required] - whether the field is required
  */
@@ -22,6 +23,7 @@ export function ContactFormField({
   as = 'input',
   value,
   onChange,
+  onBlur,
   error,
   required = false,
 }) {
@@ -40,6 +42,7 @@ export function ContactFormField({
         rows={as === 'textarea' ? 5 : undefined}
         value={value}
         onChange={onChange}
+        onBlur={onBlur}
         required={required}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}

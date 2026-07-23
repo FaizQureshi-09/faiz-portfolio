@@ -9,8 +9,39 @@ const EMPTY_FORM_VALUES = {
   message: '',
 };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const CONTACT_ENDPOINT = `${env.apiBaseUrl}/contact`;
+
+/**
+ * Validates a single contact form field.
+ * @param {keyof typeof EMPTY_FORM_VALUES} name
+ * @param {typeof EMPTY_FORM_VALUES} values
+ * @returns {string | undefined} error message, if any
+ */
+function validateField(name, values) {
+  switch (name) {
+    case 'name':
+      return values.name.trim() ? undefined : 'Please enter your name.';
+
+    case 'email': {
+      const email = values.email.trim();
+      if (!email) return 'Please enter your email address.';
+      if (!EMAIL_PATTERN.test(email)) return 'Please enter a valid email address.';
+      return undefined;
+    }
+
+    case 'message': {
+      const message = values.message.trim();
+      if (!message) return 'Please enter a message.';
+      if (message.length < 10) return 'Your message should be at least 10 characters.';
+      return undefined;
+    }
+
+    default:
+      return undefined;
+  }
+}
 
 /**
  * Validates contact form values.
@@ -20,20 +51,9 @@ const CONTACT_ENDPOINT = `${env.apiBaseUrl}/contact`;
 function validateContactForm(values) {
   const errors = {};
 
-  if (!values.name.trim()) {
-    errors.name = 'Please enter your name.';
-  }
-
-  if (!values.email.trim()) {
-    errors.email = 'Please enter your email address.';
-  } else if (!EMAIL_PATTERN.test(values.email.trim())) {
-    errors.email = 'Please enter a valid email address.';
-  }
-
-  if (!values.message.trim()) {
-    errors.message = 'Please enter a message.';
-  } else if (values.message.trim().length < 10) {
-    errors.message = 'Your message should be at least 10 characters.';
+  for (const name of ['name', 'email', 'message']) {
+    const error = validateField(name, values);
+    if (error) errors[name] = error;
   }
 
   return errors;
@@ -49,6 +69,7 @@ function validateContactForm(values) {
  *   submissionStatus: 'idle' | 'submitting' | 'success' | 'error',
  *   submitError: string,
  *   handleFieldChange: (event: React.ChangeEvent) => void,
+ *   handleFieldBlur: (event: React.FocusEvent) => void,
  *   handleSubmit: (event: React.FormEvent) => void,
  * }}
  */
@@ -61,6 +82,20 @@ export function useContactForm() {
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
     setValues((previousValues) => ({ ...previousValues, [name]: value }));
+  };
+
+  /** Validates a field as soon as the user leaves it, for immediate feedback. */
+  const handleFieldBlur = (event) => {
+    const { name } = event.target;
+    const error = validateField(name, values);
+
+    setErrors((previousErrors) => {
+      if (!error) {
+        const { [name]: _removed, ...rest } = previousErrors;
+        return rest;
+      }
+      return { ...previousErrors, [name]: error };
+    });
   };
 
   const submitContactForm = async (formValues) => {
@@ -101,5 +136,13 @@ export function useContactForm() {
       });
   };
 
-  return { values, errors, submissionStatus, submitError, handleFieldChange, handleSubmit };
+  return {
+    values,
+    errors,
+    submissionStatus,
+    submitError,
+    handleFieldChange,
+    handleFieldBlur,
+    handleSubmit,
+  };
 }

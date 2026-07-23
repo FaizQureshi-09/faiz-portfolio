@@ -3,7 +3,9 @@ AWS Lambda handler for the portfolio's "Contact Us" form.
 
 Receives a JSON payload (name, email, phone [optional], message) from an
 API Gateway POST endpoint, renders it into an HTML email template and
-sends it via SMTP from FROM_EMAIL to TO_EMAIL.
+sends it via SMTP from FROM_EMAIL to TO_EMAIL. It then sends an
+auto-reply (revert-back.html) from FROM_EMAIL to the submitter's own
+email address, acknowledging receipt.
 
 Required environment variables:
     FROM_EMAIL                   - Verified sender address used in the "From" header.
@@ -33,8 +35,13 @@ import boto3
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+EMAIL_REGEX = re.compile(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]"
+    r"(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+    r"(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
+)
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "email_template.html")
+REVERT_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "revert-back.html")
 
 REQUIRED_FIELDS = ("name", "email", "message")
 MAX_FIELD_LENGTH = 2000
@@ -167,10 +174,10 @@ def render_email_template(fields):
     if fields["phone"]:
         phone_row = (
             '<tr>'
-            '<td style="padding:10px 0;color:#6b7488;font-size:13px;'
+            '<td style="padding:10px 0;color:#94a3b8;font-size:13px;'
             'font-family:Inter,Segoe UI,sans-serif;width:120px;'
             'vertical-align:top;">Contact</td>'
-            '<td style="padding:10px 0;color:#e6f1ff;font-size:14px;'
+            '<td style="padding:10px 0;color:#0f172a;font-size:14px;'
             'font-family:Inter,Segoe UI,sans-serif;">'
             f'{html.escape(fields["phone"])}</td>'
             '</tr>'
@@ -187,6 +194,22 @@ def render_email_template(fields):
         template = template.replace(placeholder, value)
 
     return template
+
+
+def render_revert_template(fields):
+    """
+    Render the HTML auto-reply body sent back to the contact form submitter.
+
+    Args:
+        fields (dict): Normalized fields as returned by validate_payload.
+
+    Returns:
+        str: The rendered HTML document.
+    """
+    with open(REVERT_TEMPLATE_PATH, "r", encoding="utf-8") as template_file:
+        template = template_file.read()
+
+    return template.replace("{{name}}", html.escape(fields["name"]))
 
 
 def build_email_message(from_email, to_email, subject, html_body):
@@ -298,6 +321,16 @@ def lambda_handler(event, context):
 
         send_email(message)
         logger.info("Contact form email sent successfully to %s", to_email)
+
+        try:
+            revert_html = render_revert_template(fields)
+            revert_message = build_email_message(
+                from_email, fields["email"], "Thanks for reaching out!", revert_html
+            )
+            send_email(revert_message)
+            logger.info("Auto-reply email sent successfully to %s", fields["email"])
+        except (smtplib.SMTPException, OSError) as exc:
+            logger.error("Failed to send auto-reply email to %s: %s", fields["email"], exc)
 
         return build_response(200, True, "Your message has been sent successfully.")
 
