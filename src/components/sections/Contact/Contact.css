@@ -66,9 +66,53 @@
   gap: var(--space-xs);
 }
 
+.contact-form-field__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
 .contact-form-field__label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+.contact-form-field__counter {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.contact-form-field__phone-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.contact-form-field__country-select {
+  flex: 0 0 auto;
+  max-width: 40%;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-xs);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.contact-form-field__country-select:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.15);
+}
+
+.contact-form-field__phone-group .contact-form-field__control {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .contact-form-field__control {
@@ -158,5 +202,13 @@
 @media (max-width: 560px) {
   .contact-form__row {
     grid-template-columns: 1fr;
+  }
+
+  .contact-form-field__phone-group {
+    flex-direction: column;
+  }
+
+  .contact-form-field__country-select {
+    max-width: 100%;
   }
 }

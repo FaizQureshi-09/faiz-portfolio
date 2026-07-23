@@ -14,6 +14,7 @@
  * @param {(event: React.FocusEvent) => void} [props.onBlur] - blur handler, used for inline validation
  * @param {string} [props.error] - validation error message, if any
  * @param {boolean} [props.required] - whether the field is required
+ * @param {number} [props.maxLength] - max character count; also renders a live "used/limit" counter
  */
 export function ContactFormField({
   id,
@@ -26,15 +27,23 @@ export function ContactFormField({
   onBlur,
   error,
   required = false,
+  maxLength,
 }) {
   const Field = as;
 
   return (
     <div className="contact-form-field">
-      <label htmlFor={id} className="contact-form-field__label">
-        {label}
-        {required ? <span aria-hidden="true"> *</span> : null}
-      </label>
+      <div className="contact-form-field__label-row">
+        <label htmlFor={id} className="contact-form-field__label">
+          {label}
+          {required ? <span aria-hidden="true"> *</span> : null}
+        </label>
+        {maxLength ? (
+          <span className="contact-form-field__counter">
+            {value.length}/{maxLength}
+          </span>
+        ) : null}
+      </div>
       <Field
         id={id}
         name={name}
@@ -44,6 +53,7 @@ export function ContactFormField({
         onChange={onChange}
         onBlur={onBlur}
         required={required}
+        maxLength={maxLength}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
         className={`contact-form-field__control ${error ? 'contact-form-field__control--error' : ''}`}

@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaPaperPlane } from 'react-icons/fa';
-import { useContactForm } from '../../../hooks/useContactForm';
+import { MESSAGE_MAX_LENGTH, useContactForm } from '../../../hooks/useContactForm';
 import { ContactFormField } from './ContactFormField';
+import { PhoneField } from './PhoneField';
 
 /**
  * Contact form UI: name, email, contact number and message fields with
@@ -61,13 +62,12 @@ export function ContactForm() {
         />
       </div>
 
-      <ContactFormField
-        id="contact-phone"
-        name="phone"
-        type="tel"
-        label="Contact Number (optional)"
-        value={values.phone}
-        onChange={handleFieldChange}
+      <PhoneField
+        countryIso2={values.countryIso2}
+        phone={values.phone}
+        onCountryChange={handleFieldChange}
+        onPhoneChange={handleFieldChange}
+        onPhoneBlur={handleFieldBlur}
         error={errors.phone}
       />
 
@@ -80,6 +80,7 @@ export function ContactForm() {
         onChange={handleFieldChange}
         onBlur={handleFieldBlur}
         error={errors.message}
+        maxLength={MESSAGE_MAX_LENGTH}
         required
       />
 

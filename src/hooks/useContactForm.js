@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { env } from '../config/env';
+import { countryCodes, DEFAULT_COUNTRY_ISO2 } from '../data/countryCodes';
 
 /** Shape of an empty contact form. */
 const EMPTY_FORM_VALUES = {
   name: '',
   email: '',
+  countryIso2: DEFAULT_COUNTRY_ISO2,
   phone: '',
   message: '',
 };
@@ -12,6 +14,8 @@ const EMPTY_FORM_VALUES = {
 const EMAIL_PATTERN =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const CONTACT_ENDPOINT = `${env.apiBaseUrl}/contact`;
+export const MESSAGE_MAX_LENGTH = 250;
+export const PHONE_MAX_LENGTH = 10;
 
 /**
  * Validates a single contact form field.
@@ -31,10 +35,23 @@ function validateField(name, values) {
       return undefined;
     }
 
+    case 'phone': {
+      const phone = values.phone.trim();
+      if (!phone) return undefined; // optional field
+      if (!/^\d+$/.test(phone)) return 'Phone number must contain digits only.';
+      if (phone.length > PHONE_MAX_LENGTH) {
+        return `Phone number must be at most ${PHONE_MAX_LENGTH} digits.`;
+      }
+      return undefined;
+    }
+
     case 'message': {
       const message = values.message.trim();
       if (!message) return 'Please enter a message.';
       if (message.length < 10) return 'Your message should be at least 10 characters.';
+      if (message.length > MESSAGE_MAX_LENGTH) {
+        return `Your message must be at most ${MESSAGE_MAX_LENGTH} characters.`;
+      }
       return undefined;
     }
 
@@ -51,7 +68,7 @@ function validateField(name, values) {
 function validateContactForm(values) {
   const errors = {};
 
-  for (const name of ['name', 'email', 'message']) {
+  for (const name of ['name', 'email', 'phone', 'message']) {
     const error = validateField(name, values);
     if (error) errors[name] = error;
   }
@@ -81,6 +98,13 @@ export function useContactForm() {
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'phone') {
+      const digitsOnly = value.replace(/\D/g, '').slice(0, PHONE_MAX_LENGTH);
+      setValues((previousValues) => ({ ...previousValues, phone: digitsOnly }));
+      return;
+    }
+
     setValues((previousValues) => ({ ...previousValues, [name]: value }));
   };
 
@@ -99,10 +123,18 @@ export function useContactForm() {
   };
 
   const submitContactForm = async (formValues) => {
+    const dialCode = countryCodes.find((country) => country.iso2 === formValues.countryIso2)?.dialCode ?? '';
+    const payload = {
+      name: formValues.name,
+      email: formValues.email,
+      phone: formValues.phone ? `${dialCode} ${formValues.phone}` : '',
+      message: formValues.message,
+    };
+
     const response = await fetch(CONTACT_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formValues),
+      body: JSON.stringify(payload),
     });
 
     const result = await response.json().catch(() => null);

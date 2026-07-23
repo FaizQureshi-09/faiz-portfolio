@@ -40,11 +40,15 @@ EMAIL_REGEX = re.compile(
     r"(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
     r"(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
 )
+# Phone is submitted as "<dial code> <national number>", e.g. "+91 9876543210" —
+# a "+" plus dial code, a space, then up to 10 digits.
+PHONE_REGEX = re.compile(r"^\+[1-9]\d{0,3} \d{1,10}$")
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "email_template.html")
 REVERT_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "revert-back.html")
 
 REQUIRED_FIELDS = ("name", "email", "message")
 MAX_FIELD_LENGTH = 2000
+MAX_MESSAGE_LENGTH = 250
 
 
 class ValidationError(Exception):
@@ -136,7 +140,8 @@ def validate_payload(payload):
         value = payload.get(field)
         if not isinstance(value, str) or not value.strip():
             raise ValidationError(f"Field '{field}' is required.")
-        if len(value) > MAX_FIELD_LENGTH:
+        max_length = MAX_MESSAGE_LENGTH if field == "message" else MAX_FIELD_LENGTH
+        if len(value) > max_length:
             raise ValidationError(f"Field '{field}' exceeds the maximum allowed length.")
 
     name = payload["name"].strip()
@@ -148,8 +153,8 @@ def validate_payload(payload):
 
     phone = payload.get("phone")
     phone = phone.strip() if isinstance(phone, str) else ""
-    if len(phone) > MAX_FIELD_LENGTH:
-        raise ValidationError("Field 'phone' exceeds the maximum allowed length.")
+    if phone and not PHONE_REGEX.match(phone):
+        raise ValidationError("Field 'phone' must be a country code followed by up to 10 digits.")
 
     return {"name": name, "email": email, "phone": phone, "message": message}
 
