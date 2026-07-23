@@ -263,16 +263,27 @@ def _get_smtp_password():
     return _smtp_password_cache
 
 
-def send_email(message):
+def send_contact_emails(notification_message, auto_reply_message):
     """
-    Send a composed email message over SMTP using STARTTLS.
+    Send the notification and auto-reply emails over a single SMTP session.
+
+    A fresh SMTP connection pays for a TCP handshake, a STARTTLS/TLS
+    handshake and an AUTH round-trip before it can send anything — each of
+    those is a network round-trip that Lambda's low default CPU allocation
+    makes even slower. Reusing one connection for both messages instead of
+    opening it twice cuts that overhead in half.
+
+    A failure sending the auto-reply is logged but does not raise: the
+    submitter's message already reached the notification inbox, so it
+    shouldn't turn into a 502 for the caller.
 
     Args:
-        message (EmailMessage): The message to send.
+        notification_message (EmailMessage): Notification sent to TO_EMAIL.
+        auto_reply_message (EmailMessage): Auto-reply sent to the submitter.
 
     Raises:
         smtplib.SMTPException: If the SMTP server rejects the connection,
-            authentication, or the message itself.
+            authentication, or the notification message itself.
         OSError: If the connection to the SMTP server fails.
     """
     smtp_host = _clean_credential(os.environ["SMTP_HOST"])
@@ -283,7 +294,17 @@ def send_email(message):
     with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
         server.starttls()
         server.login(smtp_user, smtp_password)
-        server.send_message(message)
+
+        server.send_message(notification_message)
+        logger.info("Contact form email sent successfully to %s", notification_message["To"])
+
+        try:
+            server.send_message(auto_reply_message)
+            logger.info("Auto-reply email sent successfully to %s", auto_reply_message["To"])
+        except (smtplib.SMTPException, OSError) as exc:
+            logger.error(
+                "Failed to send auto-reply email to %s: %s", auto_reply_message["To"], exc
+            )
 
 
 def lambda_handler(event, context):
@@ -317,20 +338,14 @@ def lambda_handler(event, context):
         to_email = os.environ["TO_EMAIL"]
         from_email = os.environ["FROM_EMAIL"]
         subject = f"New contact form submission from {fields['name']}"
-        message = build_email_message(from_email, to_email, subject, html_body)
+        notification_message = build_email_message(from_email, to_email, subject, html_body)
 
-        send_email(message)
-        logger.info("Contact form email sent successfully to %s", to_email)
+        revert_html = render_revert_template(fields)
+        auto_reply_message = build_email_message(
+            from_email, fields["email"], "Thanks for reaching out!", revert_html
+        )
 
-        try:
-            revert_html = render_revert_template(fields)
-            revert_message = build_email_message(
-                from_email, fields["email"], "Thanks for reaching out!", revert_html
-            )
-            send_email(revert_message)
-            logger.info("Auto-reply email sent successfully to %s", fields["email"])
-        except (smtplib.SMTPException, OSError) as exc:
-            logger.error("Failed to send auto-reply email to %s: %s", fields["email"], exc)
+        send_contact_emails(notification_message, auto_reply_message)
 
         return build_response(200, True, "Your message has been sent successfully.")
 

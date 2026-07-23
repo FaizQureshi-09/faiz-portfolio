@@ -60,13 +60,13 @@ variable "lambda_runtime" {
 variable "lambda_timeout" {
   description = "Timeout (in seconds) for the email sender Lambda function."
   type        = number
-  default     = 10
+  default     = 15
 }
 
 variable "lambda_memory_size" {
-  description = "Memory (in MB) allocated to the email sender Lambda function."
+  description = "Memory (in MB) allocated to the email sender Lambda function. AWS Lambda allocates CPU proportionally to memory, and TLS handshakes (SSM + SMTP STARTTLS) are CPU-bound, so 128MB throttles them badly — see the perf note in email_sender.py."
   type        = number
-  default     = 128
+  default     = 512
 }
 
 variable "lambda_log_retention_in_days" {
@@ -123,13 +123,4 @@ variable "api_gateway_stage_name" {
   description = "Name of the API Gateway deployment stage (environment), e.g. dev, staging, prod."
   type        = string
   default     = "dev"
-}
-
-#--------------------------------------------------------------------
-# SSM variables
-#--------------------------------------------------------------------
-variable "smtp_password" {
-  description = "SMTP authentication password, stored as a SecureString in SSM Parameter Store and read by the Lambda at runtime. Provide this via a gitignored *.auto.tfvars file or TF_VAR_smtp_password, never commit it in env.tfvars."
-  type        = string
-  sensitive   = true
 }
