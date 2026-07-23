@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Contact Form Submission</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0a0e14;font-family:'Inter',Segoe UI,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0e14;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#141a26;border:1px solid rgba(230,241,255,0.08);border-radius:14px;overflow:hidden;">
+
+        <!-- Accent gradient bar -->
+        <tr>
+          <td style="height:6px;background-image:linear-gradient(135deg,#64ffda 0%,#38bdf8 50%,#7c3aed 100%);font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+
+        <!-- Header -->
+        <tr>
+          <td style="padding:32px 32px 16px 32px;">
+            <p style="margin:0 0 6px 0;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#64ffda;">
+              Portfolio &middot; Contact Form
+            </p>
+            <h1 style="margin:0;font-family:'Poppins',Segoe UI,sans-serif;font-size:22px;font-weight:600;color:#e6f1ff;">
+              New Message Received
+            </h1>
+            <p style="margin:8px 0 0 0;font-size:14px;color:#a8b2c1;">
+              Someone reached out through your website's contact form.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 32px;">
+            <div style="border-top:1px solid rgba(230,241,255,0.08);"></div>
+          </td>
+        </tr>
+
+        <!-- Sender details -->
+        <tr>
+          <td style="padding:24px 32px 8px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding:10px 0;color:#6b7488;font-size:13px;font-family:'Inter',Segoe UI,sans-serif;width:120px;vertical-align:top;">Name</td>
+                <td style="padding:10px 0;color:#e6f1ff;font-size:14px;font-family:'Inter',Segoe UI,sans-serif;font-weight:600;">{{name}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;color:#6b7488;font-size:13px;font-family:'Inter',Segoe UI,sans-serif;width:120px;vertical-align:top;">Email</td>
+                <td style="padding:10px 0;color:#e6f1ff;font-size:14px;font-family:'Inter',Segoe UI,sans-serif;">
+                  <a href="mailto:{{email}}" style="color:#38bdf8;text-decoration:none;">{{email}}</a>
+                </td>
+              </tr>
+              {{phone_row}}
+            </table>
+          </td>
+        </tr>
+
+        <!-- Message -->
+        <tr>
+          <td style="padding:16px 32px 32px 32px;">
+            <p style="margin:0 0 10px 0;color:#6b7488;font-size:13px;font-family:'Inter',Segoe UI,sans-serif;">Message</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#10151f;border:1px solid rgba(230,241,255,0.08);border-radius:8px;">
+              <tr>
+                <td style="padding:18px 20px;color:#e6f1ff;font-size:14px;line-height:1.7;font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;">
+                  {{message}}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 32px;background-color:#10151f;border-top:1px solid rgba(230,241,255,0.08);">
+            <p style="margin:0;font-size:12px;color:#6b7488;font-family:'Inter',Segoe UI,sans-serif;">
+              This email was sent automatically from the contact form on your portfolio website. Reply directly to this email to respond to the sender.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

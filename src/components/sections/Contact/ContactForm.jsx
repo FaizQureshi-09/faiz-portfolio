@@ -10,7 +10,8 @@ import { ContactFormField } from './ContactFormField';
  * `useContactForm`'s `submitContactForm` for where to wire up a backend.
  */
 export function ContactForm() {
-  const { values, errors, submissionStatus, handleFieldChange, handleSubmit } = useContactForm();
+  const { values, errors, submissionStatus, submitError, handleFieldChange, handleSubmit } =
+    useContactForm();
 
   if (submissionStatus === 'success') {
     return (
@@ -71,6 +72,12 @@ export function ContactForm() {
         error={errors.message}
         required
       />
+
+      {submissionStatus === 'error' ? (
+        <p className="contact-form__error-banner" role="alert">
+          {submitError}
+        </p>
+      ) : null}
 
       <button type="submit" className="contact-form__submit" disabled={submissionStatus === 'submitting'}>
         {submissionStatus === 'submitting' ? (

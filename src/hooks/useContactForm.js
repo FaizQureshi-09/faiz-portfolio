@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { env } from '../config/env';
 
 /** Shape of an empty contact form. */
 const EMPTY_FORM_VALUES = {
@@ -9,6 +10,7 @@ const EMPTY_FORM_VALUES = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CONTACT_ENDPOINT = `${env.apiBaseUrl}/contact`;
 
 /**
  * Validates contact form values.
@@ -41,15 +43,11 @@ function validateContactForm(values) {
  * Encapsulates all state and behavior for the Contact section's form:
  * field values, validation errors, and submission status.
  *
- * NOTE: `submitContactForm` is a placeholder — it does not send data
- * anywhere yet. Wire it up to an API/email service (e.g. an AWS API
- * Gateway + Lambda endpoint or a service like EmailJS) when backend
- * functionality is added.
- *
  * @returns {{
  *   values: typeof EMPTY_FORM_VALUES,
  *   errors: Record<string, string>,
- *   submissionStatus: 'idle' | 'submitting' | 'success',
+ *   submissionStatus: 'idle' | 'submitting' | 'success' | 'error',
+ *   submitError: string,
  *   handleFieldChange: (event: React.ChangeEvent) => void,
  *   handleSubmit: (event: React.FormEvent) => void,
  * }}
@@ -58,17 +56,25 @@ export function useContactForm() {
   const [values, setValues] = useState(EMPTY_FORM_VALUES);
   const [errors, setErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState('idle');
+  const [submitError, setSubmitError] = useState('');
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
     setValues((previousValues) => ({ ...previousValues, [name]: value }));
   };
 
-  /** Placeholder submit handler — replace with a real API call later. */
   const submitContactForm = async (formValues) => {
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    // eslint-disable-next-line no-console
-    console.info('Contact form submitted (no backend wired up yet):', formValues);
+    const response = await fetch(CONTACT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formValues),
+    });
+
+    const result = await response.json().catch(() => null);
+
+    if (!response.ok || !result?.success) {
+      throw new Error(result?.message || 'Failed to send your message. Please try again later.');
+    }
   };
 
   const handleSubmit = (event) => {
@@ -82,11 +88,18 @@ export function useContactForm() {
     }
 
     setSubmissionStatus('submitting');
-    submitContactForm(values).then(() => {
-      setSubmissionStatus('success');
-      setValues(EMPTY_FORM_VALUES);
-    });
+    setSubmitError('');
+
+    submitContactForm(values)
+      .then(() => {
+        setSubmissionStatus('success');
+        setValues(EMPTY_FORM_VALUES);
+      })
+      .catch((error) => {
+        setSubmissionStatus('error');
+        setSubmitError(error.message || 'Something went wrong. Please try again later.');
+      });
   };
 
-  return { values, errors, submissionStatus, handleFieldChange, handleSubmit };
+  return { values, errors, submissionStatus, submitError, handleFieldChange, handleSubmit };
 }

@@ -55,6 +55,9 @@ coverage/
 crash.log
 *.terraform.lock.hcl
 *.terraform.tfstate.lock*
+secrets.auto.tfvars
+*.auto.tfvars
+*terraform.tfstate.backup
 
 # Environment
 .env

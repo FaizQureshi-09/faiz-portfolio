@@ -97,6 +97,11 @@
   font-size: var(--font-size-xs);
 }
 
+.contact-form__error-banner {
+  color: #f87171;
+  font-size: var(--font-size-sm);
+}
+
 .contact-form__submit {
   display: inline-flex;
   align-items: center;
