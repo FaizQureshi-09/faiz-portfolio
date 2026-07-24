@@ -3,9 +3,10 @@ AWS Lambda handler for the portfolio's "Contact Us" form.
 
 Receives a JSON payload (name, email, phone [optional], message) from an
 API Gateway POST endpoint, renders it into an HTML email template and
-sends it via SMTP from FROM_EMAIL to TO_EMAIL. It then sends an
-auto-reply (revert-back.html) from FROM_EMAIL to the submitter's own
-email address, acknowledging receipt.
+sends it via SMTP from FROM_EMAIL to TO_EMAIL. It then asynchronously
+invokes itself to send an auto-reply (revert-back.html) from FROM_EMAIL to
+the submitter's own email address — that second SMTP session happens in a
+separate, decoupled invocation so it never adds to the caller's latency.
 
 Required environment variables:
     FROM_EMAIL                   - Verified sender address used in the "From" header.
@@ -16,7 +17,7 @@ Required environment variables:
                                     SMTP auth password / app password.
 
 Optional environment variables:
-    SMTP_PORT          - SMTP port. Defaults to 587 (STARTTLS).
+    SMTP_PORT          - SMTP port. Defaults to 465 (implicit TLS).
     CORS_ALLOW_ORIGIN  - Value for Access-Control-Allow-Origin. Defaults to "*".
 """
 
@@ -268,48 +269,91 @@ def _get_smtp_password():
     return _smtp_password_cache
 
 
-def send_contact_emails(notification_message, auto_reply_message):
+def send_email(message):
     """
-    Send the notification and auto-reply emails over a single SMTP session.
+    Send one composed email message over SMTP.
 
-    A fresh SMTP connection pays for a TCP handshake, a STARTTLS/TLS
-    handshake and an AUTH round-trip before it can send anything — each of
-    those is a network round-trip that Lambda's low default CPU allocation
-    makes even slower. Reusing one connection for both messages instead of
-    opening it twice cuts that overhead in half.
-
-    A failure sending the auto-reply is logged but does not raise: the
-    submitter's message already reached the notification inbox, so it
-    shouldn't turn into a 502 for the caller.
+    Two latency choices here matter for a rarely-invoked, cold-start-prone
+    Lambda:
+      - SMTP_SSL (implicit TLS, port 465) instead of SMTP+STARTTLS (587):
+        the TLS handshake happens as part of the connection itself, so we
+        skip the plaintext EHLO -> STARTTLS -> re-EHLO round trips STARTTLS
+        requires.
+      - server.close() instead of the context manager's server.quit(): we
+        already have the server's "250 OK" for the DATA command by the time
+        send_message() returns, so the message is delivered; skipping the
+        QUIT round trip just for a polite goodbye isn't worth the latency.
 
     Args:
-        notification_message (EmailMessage): Notification sent to TO_EMAIL.
-        auto_reply_message (EmailMessage): Auto-reply sent to the submitter.
+        message (EmailMessage): The message to send.
 
     Raises:
         smtplib.SMTPException: If the SMTP server rejects the connection,
-            authentication, or the notification message itself.
+            authentication, or the message itself.
         OSError: If the connection to the SMTP server fails.
     """
     smtp_host = _clean_credential(os.environ["SMTP_HOST"])
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_port = int(os.environ.get("SMTP_PORT", "465"))
     smtp_user = _clean_credential(os.environ["SMTP_USER"])
     smtp_password = _get_smtp_password()
 
-    with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
-        server.starttls()
+    server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=10)
+    try:
         server.login(smtp_user, smtp_password)
+        server.send_message(message)
+    finally:
+        server.close()
 
-        server.send_message(notification_message)
-        logger.info("Contact form email sent successfully to %s", notification_message["To"])
 
-        try:
-            server.send_message(auto_reply_message)
-            logger.info("Auto-reply email sent successfully to %s", auto_reply_message["To"])
-        except (smtplib.SMTPException, OSError) as exc:
-            logger.error(
-                "Failed to send auto-reply email to %s: %s", auto_reply_message["To"], exc
-            )
+_lambda_client = None
+
+
+def _trigger_auto_reply(fields, function_arn):
+    """
+    Asynchronously invoke this same function to send the auto-reply.
+
+    Sending it inline would mean a second full SMTP session (connect, TLS,
+    AUTH, send) on the critical path the caller is waiting on — roughly
+    doubling the response time. Dispatching it as an async ("Event")
+    invocation returns as soon as Lambda has accepted the request, so the
+    actual send happens in a separate, decoupled invocation afterwards.
+
+    Never raises: this is a best-effort side effect and must not turn a
+    successful submission into an error response.
+    """
+    global _lambda_client
+    try:
+        if _lambda_client is None:
+            _lambda_client = boto3.client("lambda")
+        _lambda_client.invoke(
+            FunctionName=function_arn,
+            InvocationType="Event",
+            Payload=json.dumps({"_internal_task": "send_auto_reply", "fields": fields}).encode(
+                "utf-8"
+            ),
+        )
+    except Exception as exc:  # noqa: BLE001 - best-effort, must never block the response
+        logger.error("Failed to trigger async auto-reply invocation: %s", exc)
+
+
+def _handle_auto_reply_task(event):
+    """
+    Entry point for the async self-invocation triggered by _trigger_auto_reply.
+
+    Runs after the HTTP response has already been returned to the caller,
+    so its latency is invisible to them.
+    """
+    fields = event["fields"]
+    try:
+        revert_html = render_revert_template(fields)
+        auto_reply_message = build_email_message(
+            os.environ["FROM_EMAIL"], fields["email"], "Thanks for reaching out!", revert_html
+        )
+        send_email(auto_reply_message)
+        logger.info("Auto-reply email sent successfully to %s", fields["email"])
+    except (smtplib.SMTPException, OSError) as exc:
+        logger.error("Failed to send auto-reply email to %s: %s", fields["email"], exc)
+    return {"ok": True}
 
 
 def lambda_handler(event, context):
@@ -318,14 +362,20 @@ def lambda_handler(event, context):
 
     Parses and validates the incoming request, renders the email template,
     sends the email via SMTP, and returns a uniform API Gateway response.
+    Also doubles as the entry point for its own async auto-reply
+    invocation — see _handle_auto_reply_task.
 
     Args:
-        event (dict): API Gateway Lambda proxy integration event.
-        context (LambdaContext): Lambda runtime context (unused).
+        event (dict): API Gateway Lambda proxy integration event, or an
+            internal {"_internal_task": "send_auto_reply", ...} event.
+        context (LambdaContext): Lambda runtime context.
 
     Returns:
         dict: API Gateway Lambda proxy integration response.
     """
+    if event.get("_internal_task") == "send_auto_reply":
+        return _handle_auto_reply_task(event)
+
     http_method = event.get("httpMethod") or event.get("requestContext", {}).get(
         "http", {}
     ).get("method")
@@ -345,12 +395,10 @@ def lambda_handler(event, context):
         subject = f"New contact form submission from {fields['name']}"
         notification_message = build_email_message(from_email, to_email, subject, html_body)
 
-        revert_html = render_revert_template(fields)
-        auto_reply_message = build_email_message(
-            from_email, fields["email"], "Thanks for reaching out!", revert_html
-        )
+        send_email(notification_message)
+        logger.info("Contact form email sent successfully to %s", to_email)
 
-        send_contact_emails(notification_message, auto_reply_message)
+        _trigger_auto_reply(fields, context.invoked_function_arn)
 
         return build_response(200, True, "Your message has been sent successfully.")
 

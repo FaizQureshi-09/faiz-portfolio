@@ -1,4 +1,4 @@
-import { FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 import { personalInfo, socialLinks } from '../../../data/personalInfo';
 import { SectionHeading } from '../../common/SectionHeading/SectionHeading';
 import { AnimatedSection } from '../../common/AnimatedSection/AnimatedSection';
@@ -29,12 +29,13 @@ export function Contact() {
 
             <ul className="contact__info-list">
               <li>
-                <FaEnvelope aria-hidden="true" />
-                <a href={`mailto:${personalInfo.email}`}>{personalInfo.email}</a>
-              </li>
-              <li>
                 <FaMapMarkerAlt aria-hidden="true" />
-                <span>{personalInfo.location}</span>
+                <span>
+                  {personalInfo.location},{' '}
+                  <span className="location-flag" role="img" aria-label="India">
+                    {personalInfo.countryFlag}
+                  </span>
+                </span>
               </li>
             </ul>
 

@@ -57,13 +57,13 @@ resource "aws_lambda_function" "email_sender" {
 
   environment {
     variables = {
-      FROM_EMAIL                  = var.contact_form_from_email
-      TO_EMAIL                    = var.contact_form_to_email
-      SMTP_HOST                   = var.smtp_host
-      SMTP_PORT                   = var.smtp_port
-      SMTP_USER                   = var.smtp_user
+      FROM_EMAIL                  = aws_ssm_parameter.from_email.value
+      TO_EMAIL                    = aws_ssm_parameter.to_email.value
+      SMTP_HOST                   = aws_ssm_parameter.smtp_host.value
+      SMTP_PORT                   = aws_ssm_parameter.smtp_port.value
+      SMTP_USER                   = aws_ssm_parameter.smtp_user.value
       SMTP_PASSWORD_SSM_PARAMETER = aws_ssm_parameter.smtp_password.name
-      CORS_ALLOW_ORIGIN           = var.cors_allow_origin
+      CORS_ALLOW_ORIGIN           = aws_ssm_parameter.cors_allow_origin.value
     }
   }
 
@@ -73,4 +73,23 @@ resource "aws_lambda_function" "email_sender" {
   ]
 
   tags = local.tags
+}
+
+#--------------------------------------------------------------------
+# Self-invoke permission (async auto-reply dispatch)
+#--------------------------------------------------------------------
+# The auto-reply is sent by having the Lambda asynchronously invoke itself
+# rather than sending it inline — see email_sender.py. That keeps the
+# second SMTP session off the critical path the caller waits on.
+data "aws_iam_policy_document" "email_sender_self_invoke" {
+  statement {
+    actions   = ["lambda:InvokeFunction"]
+    resources = [aws_lambda_function.email_sender.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "email_sender_self_invoke" {
+  name   = "${local.lambda_role_name}-self-invoke"
+  role   = aws_iam_role.email_sender.id
+  policy = data.aws_iam_policy_document.email_sender_self_invoke.json
 }

@@ -70,7 +70,7 @@ output "contact_form_endpoint" {
 }
 
 #--------------------------------------------------------------------
-# SSM - SMTP password
+# SSM - email sender Lambda config
 #--------------------------------------------------------------------
 output "smtp_password_parameter_name" {
   description = "Name of the SSM SecureString parameter holding the SMTP password."
@@ -80,4 +80,34 @@ output "smtp_password_parameter_name" {
 output "smtp_password_parameter_arn" {
   description = "ARN of the SSM SecureString parameter holding the SMTP password."
   value       = aws_ssm_parameter.smtp_password.arn
+}
+
+output "from_email_parameter_name" {
+  description = "Name of the SSM parameter holding FROM_EMAIL."
+  value       = aws_ssm_parameter.from_email.name
+}
+
+output "to_email_parameter_name" {
+  description = "Name of the SSM parameter holding TO_EMAIL."
+  value       = aws_ssm_parameter.to_email.name
+}
+
+output "smtp_host_parameter_name" {
+  description = "Name of the SSM parameter holding SMTP_HOST."
+  value       = aws_ssm_parameter.smtp_host.name
+}
+
+output "smtp_port_parameter_name" {
+  description = "Name of the SSM parameter holding SMTP_PORT."
+  value       = aws_ssm_parameter.smtp_port.name
+}
+
+output "smtp_user_parameter_name" {
+  description = "Name of the SSM parameter holding SMTP_USER."
+  value       = aws_ssm_parameter.smtp_user.name
+}
+
+output "cors_allow_origin_parameter_name" {
+  description = "Name of the SSM parameter holding CORS_ALLOW_ORIGIN."
+  value       = aws_ssm_parameter.cors_allow_origin.name
 }

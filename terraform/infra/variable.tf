@@ -13,12 +13,19 @@ locals {
 # Derived variables
 #--------------------------------------------------------------------
 locals {
-  lambda_function_name         = "${local.env_level_unique_prefix}-email-sending-lambda"
-  lambda_role_name             = "${local.lambda_function_name}-role"
-  lambda_log_group_name        = "/aws/lambda/${local.lambda_function_name}"
-  api_gateway_name             = "${local.env_level_unique_prefix}-website-api"
-  smtp_password_parameter_name = "/${local.env_level_unique_prefix}/email-sender/smtp-password"
+  lambda_function_name  = "${local.env_level_unique_prefix}-email-sending-lambda"
+  lambda_role_name      = "${local.lambda_function_name}-role"
+  lambda_log_group_name = "/aws/lambda/${local.lambda_function_name}"
+  api_gateway_name      = "${local.env_level_unique_prefix}-website-api"
 
+  ssm_parameter_prefix             = "/${local.env_level_unique_prefix}/email-sender"
+  smtp_password_parameter_name     = "${local.ssm_parameter_prefix}/smtp-password"
+  from_email_parameter_name        = "${local.ssm_parameter_prefix}/from-email"
+  to_email_parameter_name          = "${local.ssm_parameter_prefix}/to-email"
+  smtp_host_parameter_name         = "${local.ssm_parameter_prefix}/smtp-host"
+  smtp_port_parameter_name         = "${local.ssm_parameter_prefix}/smtp-port"
+  smtp_user_parameter_name         = "${local.ssm_parameter_prefix}/smtp-user"
+  cors_allow_origin_parameter_name = "${local.ssm_parameter_prefix}/cors-allow-origin"
 }
 
 #--------------------------------------------------------------------
@@ -64,9 +71,9 @@ variable "lambda_timeout" {
 }
 
 variable "lambda_memory_size" {
-  description = "Memory (in MB) allocated to the email sender Lambda function. AWS Lambda allocates CPU proportionally to memory, and TLS handshakes (SSM + SMTP STARTTLS) are CPU-bound, so 128MB throttles them badly — see the perf note in email_sender.py."
+  description = "Memory (in MB) allocated to the email sender Lambda function. AWS Lambda allocates CPU proportionally to memory, and TLS handshakes (SSM + SMTP) are CPU-bound, so low memory throttles them badly — see the perf note in email_sender.py."
   type        = number
-  default     = 512
+  default     = 1024
 }
 
 variable "lambda_log_retention_in_days" {
@@ -94,9 +101,9 @@ variable "smtp_host" {
 }
 
 variable "smtp_port" {
-  description = "SMTP server port used to send contact form emails. Passed to the Lambda as SMTP_PORT."
+  description = "SMTP server port used to send contact form emails. Passed to the Lambda as SMTP_PORT. Defaults to 465 (implicit TLS) rather than 587 (STARTTLS) — it saves a full EHLO/STARTTLS round trip, which matters for Lambda-latency."
   type        = number
-  default     = 587
+  default     = 465
 }
 
 variable "smtp_user" {

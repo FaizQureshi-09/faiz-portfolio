@@ -83,7 +83,14 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <FaMapMarkerAlt aria-hidden="true" /> {personalInfo.location} &middot;{' '}
+          <FaMapMarkerAlt aria-hidden="true" />
+          <span>
+            {personalInfo.location},{' '}
+            <span className="location-flag" role="img" aria-label="India">
+              {personalInfo.countryFlag}
+            </span>
+          </span>{' '}
+          &middot;{' '}
           {personalInfo.totalExperience} experience
         </motion.p>
 

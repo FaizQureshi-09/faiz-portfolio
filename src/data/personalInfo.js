@@ -6,10 +6,11 @@ export const personalInfo = {
   fullName: 'Mohd Faiz Qureshi',
   title: 'Backend & DevOps Engineer',
   totalExperience: '3 Years 2 Months',
-  location: 'Indore, India',
+  location: 'Indore',
+  countryFlag: '🇮🇳',
   email: 'mdfaizqureshi09@gmail.com',
   linkedInUrl: 'https://www.linkedin.com/in/mohd-faiz-qureshi-441242207/',
-  githubUrl: 'https://github.com/faiz-009?tab=repositories',
+  githubUrl: 'https://github.com/FaizQureshi-09',
   resumeTagline:
     'Building resilient backends and automating the cloud, one pipeline at a time.',
 };
@@ -17,14 +18,11 @@ export const personalInfo = {
 /**
  * Social/profile links rendered wherever brand icons are needed
  * (navbar, footer, hero section).
+ *
+ * The email address is intentionally not linked here — visitors are
+ * directed to the Contact section's form instead of emailing directly.
  */
 export const socialLinks = [
-  {
-    id: 'email',
-    label: 'Email',
-    href: `mailto:${personalInfo.email}`,
-    iconKey: 'email',
-  },
   {
     id: 'linkedin',
     label: 'LinkedIn',

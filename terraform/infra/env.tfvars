@@ -11,7 +11,7 @@ product_name   = "portfolio"
 contact_form_from_email = "mdfaizqureshi09+portfolio@gmail.com"
 contact_form_to_email   = "mdfaizqureshi09+portfolio@gmail.com"
 smtp_host               = "smtp.gmail.com"
-smtp_port               = 587
+smtp_port               = 465
 smtp_user               = "mdfaizqureshi09+portfolio@gmail.com"
 cors_allow_origin       = "*"
 

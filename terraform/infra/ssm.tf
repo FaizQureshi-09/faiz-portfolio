@@ -19,6 +19,63 @@ resource "aws_ssm_parameter" "smtp_password" {
 }
 
 #--------------------------------------------------------------------
+# Non-secret config parameters
+#--------------------------------------------------------------------
+# Everything the Lambda needs besides the SMTP password also lives in SSM,
+# for a consistent, centrally-visible config story. Unlike the password,
+# these aren't fetched at runtime — Terraform reads their value at apply
+# time straight into the Lambda's environment variables, so there's no
+# extra network round trip (and therefore no added latency) on every
+# invocation.
+resource "aws_ssm_parameter" "from_email" {
+  name        = local.from_email_parameter_name
+  description = "Verified sender address used in the contact form email's From header."
+  type        = "String"
+  value       = var.contact_form_from_email
+  tags        = local.tags
+}
+
+resource "aws_ssm_parameter" "to_email" {
+  name        = local.to_email_parameter_name
+  description = "Inbox that receives contact form submissions."
+  type        = "String"
+  value       = var.contact_form_to_email
+  tags        = local.tags
+}
+
+resource "aws_ssm_parameter" "smtp_host" {
+  name        = local.smtp_host_parameter_name
+  description = "SMTP server hostname used to send contact form emails."
+  type        = "String"
+  value       = var.smtp_host
+  tags        = local.tags
+}
+
+resource "aws_ssm_parameter" "smtp_port" {
+  name        = local.smtp_port_parameter_name
+  description = "SMTP server port used to send contact form emails."
+  type        = "String"
+  value       = tostring(var.smtp_port)
+  tags        = local.tags
+}
+
+resource "aws_ssm_parameter" "smtp_user" {
+  name        = local.smtp_user_parameter_name
+  description = "SMTP authentication username."
+  type        = "String"
+  value       = var.smtp_user
+  tags        = local.tags
+}
+
+resource "aws_ssm_parameter" "cors_allow_origin" {
+  name        = local.cors_allow_origin_parameter_name
+  description = "Value returned in the Access-Control-Allow-Origin header."
+  type        = "String"
+  value       = var.cors_allow_origin
+  tags        = local.tags
+}
+
+#--------------------------------------------------------------------
 # Lambda access
 #--------------------------------------------------------------------
 data "aws_iam_policy_document" "email_sender_read_smtp_password" {
