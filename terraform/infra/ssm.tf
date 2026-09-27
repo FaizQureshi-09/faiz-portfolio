@@ -83,6 +83,29 @@ resource "aws_ssm_parameter" "start_date" {
   tags        = local.tags
 }
 
+resource "aws_ssm_parameter" "email_sender_api_from_email" {
+  name        = local.email_sender_api_from_email_parameter_name
+  description = "Verified sender address used in the generic email sender API's From header."
+  type        = "String"
+  value       = var.email_sender_api_from_email
+  tags        = local.tags
+}
+
+# The real key is set out-of-band (AWS Console or `aws ssm put-parameter
+# --overwrite`) after creation, same pattern as smtp_password above —
+# Terraform owns its existence, not its value.
+resource "aws_ssm_parameter" "email_sender_api_key" {
+  name        = local.email_sender_api_key_parameter_name
+  description = "Shared-secret API key clients must send in the x-api-key header to call the generic email sender API. Value is managed out-of-band; Terraform ignores changes to it."
+  type        = "SecureString"
+  value       = "REPLACE_ME_VIA_CONSOLE_OR_CLI"
+  tags        = local.tags
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 #--------------------------------------------------------------------
 # Lambda access
 #--------------------------------------------------------------------

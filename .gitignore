@@ -68,3 +68,6 @@ secrets.auto.tfvars
 # Personal documents (resumes, drafts) — not for the public repo
 *resume*.pdf
 post.md
+
+# Local test fixtures containing live API keys/secrets
+test_email_sender_api_request.json

@@ -70,6 +70,39 @@ output "experience_lambda_log_group_arn" {
 }
 
 #--------------------------------------------------------------------
+# Lambda - generic email sender API
+#--------------------------------------------------------------------
+output "email_sender_api_lambda_function_name" {
+  description = "Name of the generic email sender API Lambda function."
+  value       = aws_lambda_function.email_sender_api.function_name
+}
+
+output "email_sender_api_lambda_function_arn" {
+  description = "ARN of the generic email sender API Lambda function."
+  value       = aws_lambda_function.email_sender_api.arn
+}
+
+output "email_sender_api_lambda_role_name" {
+  description = "Name of the IAM role assumed by the generic email sender API Lambda function."
+  value       = aws_iam_role.email_sender_api.name
+}
+
+output "email_sender_api_lambda_role_arn" {
+  description = "ARN of the IAM role assumed by the generic email sender API Lambda function."
+  value       = aws_iam_role.email_sender_api.arn
+}
+
+output "email_sender_api_lambda_log_group_name" {
+  description = "Name of the CloudWatch log group for the generic email sender API Lambda function."
+  value       = aws_cloudwatch_log_group.email_sender_api.name
+}
+
+output "email_sender_api_lambda_log_group_arn" {
+  description = "ARN of the CloudWatch log group for the generic email sender API Lambda function."
+  value       = aws_cloudwatch_log_group.email_sender_api.arn
+}
+
+#--------------------------------------------------------------------
 # API Gateway - portfolio website
 #--------------------------------------------------------------------
 output "api_gateway_id" {
@@ -105,6 +138,11 @@ output "contact_form_endpoint" {
 output "experience_endpoint" {
   description = "Invoke URL for the get-experience GET endpoint."
   value       = "${aws_apigatewayv2_stage.portfolio_website.invoke_url}${var.experience_route_path}"
+}
+
+output "email_sender_endpoint" {
+  description = "Invoke URL for the generic email sender POST endpoint."
+  value       = "${aws_apigatewayv2_stage.portfolio_website.invoke_url}${var.email_sender_route_path}"
 }
 
 #--------------------------------------------------------------------
@@ -153,4 +191,22 @@ output "cors_allow_origin_parameter_name" {
 output "start_date_parameter_name" {
   description = "Name of the SSM parameter holding START_DATE."
   value       = aws_ssm_parameter.start_date.name
+}
+
+#--------------------------------------------------------------------
+# SSM - generic email sender API Lambda config
+#--------------------------------------------------------------------
+output "email_sender_api_from_email_parameter_name" {
+  description = "Name of the SSM parameter holding the generic email sender API's FROM_EMAIL."
+  value       = aws_ssm_parameter.email_sender_api_from_email.name
+}
+
+output "email_sender_api_key_parameter_name" {
+  description = "Name of the SSM SecureString parameter holding the generic email sender API's key."
+  value       = aws_ssm_parameter.email_sender_api_key.name
+}
+
+output "email_sender_api_key_parameter_arn" {
+  description = "ARN of the SSM SecureString parameter holding the generic email sender API's key."
+  value       = aws_ssm_parameter.email_sender_api_key.arn
 }

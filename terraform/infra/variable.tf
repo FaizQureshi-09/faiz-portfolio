@@ -33,6 +33,14 @@ locals {
 
   experience_ssm_parameter_prefix = "/${local.env_level_unique_prefix}/get-experience"
   start_date_parameter_name       = "${local.experience_ssm_parameter_prefix}/start-date"
+
+  email_sender_api_lambda_function_name  = "${local.env_level_unique_prefix}-email-sender-api-lambda"
+  email_sender_api_lambda_role_name      = "${local.email_sender_api_lambda_function_name}-role"
+  email_sender_api_lambda_log_group_name = "/aws/lambda/${local.email_sender_api_lambda_function_name}"
+
+  email_sender_api_ssm_parameter_prefix      = "/${local.env_level_unique_prefix}/email-sender-api"
+  email_sender_api_from_email_parameter_name = "${local.email_sender_api_ssm_parameter_prefix}/from-email"
+  email_sender_api_key_parameter_name        = "${local.email_sender_api_ssm_parameter_prefix}/api-key"
 }
 
 #--------------------------------------------------------------------
@@ -163,4 +171,30 @@ variable "experience_route_path" {
   description = "API Gateway route path that triggers the get-experience Lambda, e.g. /experience."
   type        = string
   default     = "/experience"
+}
+
+#--------------------------------------------------------------------
+# Generic email sender API Lambda
+#--------------------------------------------------------------------
+variable "email_sender_api_from_email" {
+  description = "Verified sender address used in the generic email API's From header. Passed to the Lambda as FROM_EMAIL and SMTP_USER."
+  type        = string
+}
+
+variable "email_sender_api_lambda_memory_size" {
+  description = "Memory (in MB) allocated to the generic email sender API Lambda function. TLS handshakes (SSM + SMTP) are CPU-bound, so it shares the email-sender Lambda's memory sizing."
+  type        = number
+  default     = 1024
+}
+
+variable "email_sender_api_lambda_timeout" {
+  description = "Timeout (in seconds) for the generic email sender API Lambda function."
+  type        = number
+  default     = 15
+}
+
+variable "email_sender_route_path" {
+  description = "API Gateway route path that triggers the generic email sender API Lambda, e.g. /email-sender."
+  type        = string
+  default     = "/email-sender"
 }

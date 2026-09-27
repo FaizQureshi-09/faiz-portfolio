@@ -70,3 +70,28 @@ resource "aws_lambda_permission" "allow_api_gateway_invoke_get_experience" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.portfolio_website.execution_arn}/*/*"
 }
+
+#--------------------------------------------------------------------
+# Generic email sender API integration + route
+#--------------------------------------------------------------------
+resource "aws_apigatewayv2_integration" "email_sender_api" {
+  api_id                 = aws_apigatewayv2_api.portfolio_website.id
+  integration_type       = "AWS_PROXY"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.email_sender_api.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "email_sender_api_post" {
+  api_id    = aws_apigatewayv2_api.portfolio_website.id
+  route_key = "POST ${var.email_sender_route_path}"
+  target    = "integrations/${aws_apigatewayv2_integration.email_sender_api.id}"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway_invoke_email_sender_api" {
+  statement_id  = "AllowAPIGatewayInvokeEmailSenderApi"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.email_sender_api.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.portfolio_website.execution_arn}/*/*"
+}
