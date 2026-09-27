@@ -70,4 +70,4 @@ secrets.auto.tfvars
 post.md
 
 # Local test fixtures containing live API keys/secrets
-test_email_sender_api_request.json
+test_email_sender_api.sh
