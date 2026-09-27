@@ -75,6 +75,14 @@ resource "aws_ssm_parameter" "cors_allow_origin" {
   tags        = local.tags
 }
 
+resource "aws_ssm_parameter" "start_date" {
+  name        = local.start_date_parameter_name
+  description = "Career start date (dd/mm/yyyy) used by the get-experience Lambda to compute total experience."
+  type        = "String"
+  value       = var.start_date
+  tags        = local.tags
+}
+
 #--------------------------------------------------------------------
 # Lambda access
 #--------------------------------------------------------------------

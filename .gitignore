@@ -61,3 +61,10 @@ secrets.auto.tfvars
 
 # Environment
 .env
+
+# Claude
+.claude
+
+# Personal documents (resumes, drafts) — not for the public repo
+*resume*.pdf
+post.md

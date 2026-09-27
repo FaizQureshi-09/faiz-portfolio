@@ -4,15 +4,14 @@
  */
 export const personalInfo = {
   fullName: 'Mohd Faiz Qureshi',
-  title: 'Backend & DevOps Engineer',
-  totalExperience: '3 Years 2 Months',
+  title: 'Software Engineer',
   location: 'Indore',
   countryFlag: '🇮🇳',
-  email: 'mdfaizqureshi09@gmail.com',
+  email: 'mohdfaizqureshi.official+portfolio@gmail.com',
   linkedInUrl: 'https://www.linkedin.com/in/mohd-faiz-qureshi-441242207/',
   githubUrl: 'https://github.com/FaizQureshi-09',
   resumeTagline:
-    'Building resilient backends and automating the cloud, one pipeline at a time.',
+    'Building Java and Python backend systems, automating AWS infrastructure, and shipping GenAI-powered tooling.',
 };
 
 /**

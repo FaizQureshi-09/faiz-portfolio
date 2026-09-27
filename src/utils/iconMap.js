@@ -1,4 +1,4 @@
-import { FaJava, FaAws, FaGitAlt, FaSlack, FaDatabase, FaNetworkWired, FaCubes, FaBrain, FaMagic, FaInfinity, FaExchangeAlt, FaUsers, FaShieldAlt, FaBolt, FaLayerGroup, FaCoins, FaLinkedin, FaGithub, FaEnvelope } from 'react-icons/fa';
+import { FaJava, FaAws, FaGitAlt, FaSlack, FaDatabase, FaNetworkWired, FaCubes, FaBrain, FaMagic, FaInfinity, FaExchangeAlt, FaUsers, FaShieldAlt, FaBolt, FaLayerGroup, FaCoins, FaLinkedin, FaGithub, FaEnvelope, FaClipboardCheck } from 'react-icons/fa';
 import { SiPython, SiNodedotjs, SiTerraform, SiSpring, SiFastapi, SiPostgresql, SiDocker, SiPostman, SiSwagger, SiOpentelemetry, SiGnubash } from 'react-icons/si';
 import { TbBrandAzure } from 'react-icons/tb';
 
@@ -19,6 +19,7 @@ export const iconRegistry = {
   postgresql: SiPostgresql,
   sql: FaDatabase,
   dynamodb: FaDatabase,
+  database: FaDatabase,
   aws: FaAws,
   azure: TbBrandAzure,
   docker: SiDocker,
@@ -35,6 +36,7 @@ export const iconRegistry = {
   slack: FaSlack,
   people: FaUsers,
   shield: FaShieldAlt,
+  interview: FaClipboardCheck,
   automation: FaBolt,
   infrastructure: FaLayerGroup,
   availability: FaNetworkWired,

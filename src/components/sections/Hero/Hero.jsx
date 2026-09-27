@@ -2,15 +2,16 @@ import { motion } from 'framer-motion';
 import { FaArrowDown, FaMapMarkerAlt } from 'react-icons/fa';
 import profilePhoto from '../../../assets/images/profile-photo.jpeg';
 import { personalInfo, socialLinks } from '../../../data/personalInfo';
+import { useExperience } from '../../../hooks/useExperience';
 import { useTypewriter } from '../../../hooks/useTypewriter';
 import { SocialLinks } from '../../common/SocialLinks/SocialLinks';
 import './Hero.css';
 
 /** Rotating role phrases typed out beneath the name in the hero banner. */
 const ROLE_PHRASES = [
-  'Backend & DevOps Engineer',
-  'Cloud Automation Specialist',
-  'Microservices Architect',
+  'Software Engineer',
+  'Java & Python Backend Engineer',
+  'AWS Cloud & DevOps Engineer',
   'GenAI Workflow Builder',
 ];
 
@@ -20,6 +21,7 @@ const ROLE_PHRASES = [
  */
 export function Hero() {
   const typedRole = useTypewriter(ROLE_PHRASES);
+  const { formatted: totalExperience } = useExperience();
 
   return (
     <section id="home" className="hero">
@@ -91,7 +93,7 @@ export function Hero() {
             </span>
           </span>{' '}
           &middot;{' '}
-          {personalInfo.totalExperience} experience
+          {totalExperience} experience
         </motion.p>
 
         <motion.div

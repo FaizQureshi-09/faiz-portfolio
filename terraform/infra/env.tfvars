@@ -8,12 +8,17 @@ product_name   = "portfolio"
 #--------------------------------------------------------------------
 # Email sender Lambda
 #--------------------------------------------------------------------
-contact_form_from_email = "mdfaizqureshi09+portfolio@gmail.com"
-contact_form_to_email   = "mdfaizqureshi09+portfolio@gmail.com"
+contact_form_from_email = "mohdfaizqureshi.official+portfolio@gmail.com"
+contact_form_to_email   = "mohdfaizqureshi.official+portfolio@gmail.com"
 smtp_host               = "smtp.gmail.com"
 smtp_port               = 465
-smtp_user               = "mdfaizqureshi09+portfolio@gmail.com"
+smtp_user               = "mohdfaizqureshi.official+portfolio@gmail.com"
 cors_allow_origin       = "*"
+
+#--------------------------------------------------------------------
+# Get-experience Lambda
+#--------------------------------------------------------------------
+start_date = "01/06/2023"
 
 #--------------------------------------------------------------------
 # API Gateway

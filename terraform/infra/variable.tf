@@ -26,6 +26,13 @@ locals {
   smtp_port_parameter_name         = "${local.ssm_parameter_prefix}/smtp-port"
   smtp_user_parameter_name         = "${local.ssm_parameter_prefix}/smtp-user"
   cors_allow_origin_parameter_name = "${local.ssm_parameter_prefix}/cors-allow-origin"
+
+  experience_lambda_function_name  = "${local.env_level_unique_prefix}-get-experience-lambda"
+  experience_lambda_role_name      = "${local.experience_lambda_function_name}-role"
+  experience_lambda_log_group_name = "/aws/lambda/${local.experience_lambda_function_name}"
+
+  experience_ssm_parameter_prefix = "/${local.env_level_unique_prefix}/get-experience"
+  start_date_parameter_name       = "${local.experience_ssm_parameter_prefix}/start-date"
 }
 
 #--------------------------------------------------------------------
@@ -130,4 +137,30 @@ variable "api_gateway_stage_name" {
   description = "Name of the API Gateway deployment stage (environment), e.g. dev, staging, prod."
   type        = string
   default     = "dev"
+}
+
+#--------------------------------------------------------------------
+# Get-experience Lambda
+#--------------------------------------------------------------------
+variable "experience_lambda_memory_size" {
+  description = "Memory (in MB) allocated to the get-experience Lambda function. It does no network calls at runtime (env vars only, no SSM/SMTP), so it doesn't need the CPU headroom the email sender does."
+  type        = number
+  default     = 128
+}
+
+variable "experience_lambda_timeout" {
+  description = "Timeout (in seconds) for the get-experience Lambda function."
+  type        = number
+  default     = 5
+}
+
+variable "start_date" {
+  description = "Career start date used to compute total experience, in dd/mm/yyyy format. Passed to the Lambda as START_DATE via SSM."
+  type        = string
+}
+
+variable "experience_route_path" {
+  description = "API Gateway route path that triggers the get-experience Lambda, e.g. /experience."
+  type        = string
+  default     = "/experience"
 }

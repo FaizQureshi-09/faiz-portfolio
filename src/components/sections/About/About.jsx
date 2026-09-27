@@ -1,5 +1,6 @@
 import { keyAchievements } from '../../../data/achievementsData';
 import { highlightStats, professionalSummary } from '../../../data/summaryData';
+import { useExperience } from '../../../hooks/useExperience';
 import { SectionHeading } from '../../common/SectionHeading/SectionHeading';
 import { AnimatedSection } from '../../common/AnimatedSection/AnimatedSection';
 import { AchievementCard } from './AchievementCard';
@@ -11,6 +12,18 @@ import './About.css';
  * statistics, and key achievements into a single scroll-revealed block.
  */
 export function About() {
+  const { statValue, statDecimalPlaces } = useExperience();
+  const stats = [
+    {
+      id: 'experience',
+      value: statValue,
+      suffix: ' yrs',
+      label: 'Total Experience',
+      decimalPlaces: statDecimalPlaces,
+    },
+    ...highlightStats,
+  ];
+
   return (
     <section id="about" className="section about">
       <div className="container">
@@ -25,8 +38,14 @@ export function About() {
         </AnimatedSection>
 
         <div className="about__stats">
-          {highlightStats.map((stat) => (
-            <StatCard key={stat.id} value={stat.value} suffix={stat.suffix} label={stat.label} />
+          {stats.map((stat) => (
+            <StatCard
+              key={stat.id}
+              value={stat.value}
+              suffix={stat.suffix}
+              label={stat.label}
+              decimalPlaces={stat.decimalPlaces}
+            />
           ))}
         </div>
 

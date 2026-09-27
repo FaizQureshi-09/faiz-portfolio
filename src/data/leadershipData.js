@@ -4,12 +4,20 @@
  */
 export const leadershipRoles = [
   {
-    id: 'people-management',
+    id: 'resource-manager',
     iconKey: 'people',
-    title: 'People Management',
+    title: 'Resource Manager',
     bullets: [
-      'Manage a team of 10 direct reports — overseeing task delivery, goal setting, and performance.',
+      'Manage 5 direct reports — task allocation, delivery tracking, goal setting, and performance management.',
       'Handle leave and attendance approvals; act as liaison between management and team, addressing concerns.',
+    ],
+  },
+  {
+    id: 'technical-interview-panel',
+    iconKey: 'interview',
+    title: 'Technical Interview Panel',
+    bullets: [
+      'Evaluate candidates for backend/cloud/DevOps engineering roles as part of the organization’s hiring panel.',
     ],
   },
   {
@@ -17,7 +25,7 @@ export const leadershipRoles = [
     iconKey: 'shield',
     title: 'POSH Committee Member',
     bullets: [
-      'Serve on the internal POSH committee, reviewing complaints and voting on case resolutions as a jury member (zero cases to date).',
+      'Review complaints and vote on case resolutions as a jury member on the internal POSH committee.',
     ],
   },
 ];

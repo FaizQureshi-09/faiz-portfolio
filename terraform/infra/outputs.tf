@@ -37,6 +37,39 @@ output "lambda_log_group_arn" {
 }
 
 #--------------------------------------------------------------------
+# Lambda - get experience
+#--------------------------------------------------------------------
+output "experience_lambda_function_name" {
+  description = "Name of the get-experience Lambda function."
+  value       = aws_lambda_function.get_experience.function_name
+}
+
+output "experience_lambda_function_arn" {
+  description = "ARN of the get-experience Lambda function."
+  value       = aws_lambda_function.get_experience.arn
+}
+
+output "experience_lambda_role_name" {
+  description = "Name of the IAM role assumed by the get-experience Lambda function."
+  value       = aws_iam_role.get_experience.name
+}
+
+output "experience_lambda_role_arn" {
+  description = "ARN of the IAM role assumed by the get-experience Lambda function."
+  value       = aws_iam_role.get_experience.arn
+}
+
+output "experience_lambda_log_group_name" {
+  description = "Name of the CloudWatch log group for the get-experience Lambda function."
+  value       = aws_cloudwatch_log_group.get_experience.name
+}
+
+output "experience_lambda_log_group_arn" {
+  description = "ARN of the CloudWatch log group for the get-experience Lambda function."
+  value       = aws_cloudwatch_log_group.get_experience.arn
+}
+
+#--------------------------------------------------------------------
 # API Gateway - portfolio website
 #--------------------------------------------------------------------
 output "api_gateway_id" {
@@ -67,6 +100,11 @@ output "api_gateway_stage_invoke_url" {
 output "contact_form_endpoint" {
   description = "Invoke URL for the contact form POST endpoint."
   value       = "${aws_apigatewayv2_stage.portfolio_website.invoke_url}${var.contact_form_route_path}"
+}
+
+output "experience_endpoint" {
+  description = "Invoke URL for the get-experience GET endpoint."
+  value       = "${aws_apigatewayv2_stage.portfolio_website.invoke_url}${var.experience_route_path}"
 }
 
 #--------------------------------------------------------------------
@@ -110,4 +148,9 @@ output "smtp_user_parameter_name" {
 output "cors_allow_origin_parameter_name" {
   description = "Name of the SSM parameter holding CORS_ALLOW_ORIGIN."
   value       = aws_ssm_parameter.cors_allow_origin.name
+}
+
+output "start_date_parameter_name" {
+  description = "Name of the SSM parameter holding START_DATE."
+  value       = aws_ssm_parameter.start_date.name
 }

@@ -7,7 +7,7 @@ resource "aws_apigatewayv2_api" "portfolio_website" {
 
   cors_configuration {
     allow_origins = [var.cors_allow_origin]
-    allow_methods = ["OPTIONS", "POST"]
+    allow_methods = ["OPTIONS", "POST", "GET"]
     allow_headers = ["Content-Type"]
   }
 
@@ -42,6 +42,31 @@ resource "aws_lambda_permission" "allow_api_gateway_invoke" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.email_sender.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.portfolio_website.execution_arn}/*/*"
+}
+
+#--------------------------------------------------------------------
+# Get-experience integration + route
+#--------------------------------------------------------------------
+resource "aws_apigatewayv2_integration" "get_experience" {
+  api_id                 = aws_apigatewayv2_api.portfolio_website.id
+  integration_type       = "AWS_PROXY"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.get_experience.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "get_experience_get" {
+  api_id    = aws_apigatewayv2_api.portfolio_website.id
+  route_key = "GET ${var.experience_route_path}"
+  target    = "integrations/${aws_apigatewayv2_integration.get_experience.id}"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway_invoke_get_experience" {
+  statement_id  = "AllowAPIGatewayInvokeGetExperience"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_experience.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.portfolio_website.execution_arn}/*/*"
 }
