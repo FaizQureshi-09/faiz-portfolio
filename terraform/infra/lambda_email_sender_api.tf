@@ -62,7 +62,6 @@ resource "aws_lambda_function" "email_sender_api" {
       SMTP_PORT                   = aws_ssm_parameter.smtp_port.value
       SMTP_USER                   = aws_ssm_parameter.email_sender_api_from_email.value
       SMTP_PASSWORD_SSM_PARAMETER = aws_ssm_parameter.smtp_password.name
-      API_KEY_SSM_PARAMETER       = aws_ssm_parameter.email_sender_api_key.name
       CORS_ALLOW_ORIGIN           = aws_ssm_parameter.cors_allow_origin.value
     }
   }
@@ -76,15 +75,12 @@ resource "aws_lambda_function" "email_sender_api" {
 }
 
 #--------------------------------------------------------------------
-# SSM access (SMTP password + API key)
+# SSM access (SMTP password)
 #--------------------------------------------------------------------
 data "aws_iam_policy_document" "email_sender_api_read_ssm_secrets" {
   statement {
-    actions = ["ssm:GetParameter"]
-    resources = [
-      aws_ssm_parameter.smtp_password.arn,
-      aws_ssm_parameter.email_sender_api_key.arn,
-    ]
+    actions   = ["ssm:GetParameter"]
+    resources = [aws_ssm_parameter.smtp_password.arn]
   }
 
   statement {

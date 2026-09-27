@@ -3,7 +3,7 @@ AWS Lambda handler for the generic "/email-sender" API.
 
 Accepts a JSON payload (to_email, subject, body, attachments [optional])
 from an API Gateway POST endpoint and sends a plain-text email via SMTP
-from FROM_EMAIL. Requires a matching x-api-key header on every request.
+from FROM_EMAIL.
 
 Required environment variables:
     FROM_EMAIL                   - Verified sender address used in the "From" header.
@@ -11,8 +11,6 @@ Required environment variables:
     SMTP_USER                    - SMTP auth username.
     SMTP_PASSWORD_SSM_PARAMETER  - Name of the SSM SecureString parameter holding the
                                     SMTP auth password / app password.
-    API_KEY_SSM_PARAMETER        - Name of the SSM SecureString parameter holding the
-                                    API key clients must send in the x-api-key header.
 
 Optional environment variables:
     SMTP_PORT          - SMTP port. Defaults to 465 (implicit TLS).
@@ -53,16 +51,12 @@ class ValidationError(Exception):
     """Raised when the incoming payload fails validation."""
 
 
-class AuthError(Exception):
-    """Raised when the request's API key is missing or incorrect."""
-
-
 def _cors_headers():
     """Build the CORS headers shared by every response."""
     return {
         "Access-Control-Allow-Origin": os.environ.get("CORS_ALLOW_ORIGIN", "*"),
         "Access-Control-Allow-Methods": "OPTIONS,POST",
-        "Access-Control-Allow-Headers": "Content-Type,x-api-key",
+        "Access-Control-Allow-Headers": "Content-Type",
     }
 
 
@@ -126,13 +120,6 @@ def is_valid_email(email):
     return bool(EMAIL_REGEX.match(email))
 
 
-def _get_header(event, name):
-    """Case-insensitively look up a header from an API Gateway proxy event."""
-    headers = event.get("headers") or {}
-    lowered = {key.lower(): value for key, value in headers.items()}
-    return lowered.get(name.lower())
-
-
 def _clean_credential(value):
     """
     Normalize a credential pulled from the environment or SSM.
@@ -147,7 +134,6 @@ def _clean_credential(value):
 
 _ssm_client = None
 _smtp_password_cache = None
-_api_key_cache = None
 
 
 def _get_ssm_parameter(parameter_name):
@@ -165,26 +151,6 @@ def _get_smtp_password():
     if _smtp_password_cache is None:
         _smtp_password_cache = _get_ssm_parameter(os.environ["SMTP_PASSWORD_SSM_PARAMETER"])
     return _smtp_password_cache
-
-
-def _get_api_key():
-    """Fetch and cache the expected API key from its SSM SecureString parameter."""
-    global _api_key_cache
-    if _api_key_cache is None:
-        _api_key_cache = _get_ssm_parameter(os.environ["API_KEY_SSM_PARAMETER"])
-    return _api_key_cache
-
-
-def authenticate_request(event):
-    """
-    Verify the caller supplied the correct x-api-key header.
-
-    Raises:
-        AuthError: If the header is missing or doesn't match the configured key.
-    """
-    supplied_key = _get_header(event, "x-api-key")
-    if not supplied_key or supplied_key != _get_api_key():
-        raise AuthError("Missing or invalid API key.")
 
 
 def validate_attachment(attachment, index):
@@ -359,9 +325,9 @@ def lambda_handler(event, context):
     """
     Entry point for the generic email-sender Lambda.
 
-    Authenticates the request via x-api-key, parses and validates the
-    payload, builds a plain-text email (with optional attachments), sends
-    it via SMTP, and returns a uniform API Gateway response.
+    Parses and validates the payload, builds a plain-text email (with
+    optional attachments), sends it via SMTP, and returns a uniform API
+    Gateway response.
 
     Args:
         event (dict): API Gateway Lambda proxy integration event.
@@ -379,8 +345,6 @@ def lambda_handler(event, context):
         return build_response(200, True, "OK")
 
     try:
-        authenticate_request(event)
-
         payload = parse_request_body(event)
         fields = validate_payload(payload)
         logger.info(
@@ -393,10 +357,6 @@ def lambda_handler(event, context):
 
         logger.info("Email sent successfully to %s", fields["to_email"])
         return build_response(200, True, "Email sent successfully.")
-
-    except AuthError as exc:
-        logger.warning("Authentication failed: %s", exc)
-        return build_response(401, False, str(exc))
 
     except ValidationError as exc:
         logger.warning("Validation failed for email request: %s", exc)

@@ -200,13 +200,3 @@ output "email_sender_api_from_email_parameter_name" {
   description = "Name of the SSM parameter holding the generic email sender API's FROM_EMAIL."
   value       = aws_ssm_parameter.email_sender_api_from_email.name
 }
-
-output "email_sender_api_key_parameter_name" {
-  description = "Name of the SSM SecureString parameter holding the generic email sender API's key."
-  value       = aws_ssm_parameter.email_sender_api_key.name
-}
-
-output "email_sender_api_key_parameter_arn" {
-  description = "ARN of the SSM SecureString parameter holding the generic email sender API's key."
-  value       = aws_ssm_parameter.email_sender_api_key.arn
-}

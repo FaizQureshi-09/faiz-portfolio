@@ -40,7 +40,6 @@ locals {
 
   email_sender_api_ssm_parameter_prefix      = "/${local.env_level_unique_prefix}/email-sender-api"
   email_sender_api_from_email_parameter_name = "${local.email_sender_api_ssm_parameter_prefix}/from-email"
-  email_sender_api_key_parameter_name        = "${local.email_sender_api_ssm_parameter_prefix}/api-key"
 }
 
 #--------------------------------------------------------------------
